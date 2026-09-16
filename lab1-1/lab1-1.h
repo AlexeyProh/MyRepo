@@ -8,7 +8,7 @@ class Matrix
     int *matrix{nullptr};
 
 public:
-    Matrix() = default;
+    Matrix() = delete;
 
     Matrix(int r, int c) : rows(r), cols(c)
     {
