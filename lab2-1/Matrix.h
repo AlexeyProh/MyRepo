@@ -8,7 +8,7 @@ class Matrix
     int *matrix{nullptr};
 
 public:
-    Matrix() = delete;
+    Matrix() : rows(0), cols(0), matrix(nullptr) { }
 
     Matrix(int r, int c) : rows(r), cols(c)
     {
@@ -127,34 +127,51 @@ public:
         return *this;
     }
 
-    void printMatrix() const
+    friend std::ostream& operator<<(std::ostream& os, const Matrix& mat)
     {
-        for (size_t i = 0; i < rows; i++)
+        if (mat.rows == 0 || mat.cols == 0)
         {
-            for (size_t j = 0; j < cols; j++)
-            {
-                std::cout << " " << matrix[i * cols + j] << " ";
-            }
-            std::cout << std::endl;
+            os << "Пустая матрица";
+            return os;
         }
+
+        for (int i = 0; i < mat.rows; i++)
+        {
+            for (int j = 0; j < mat.cols; j++)
+            {
+                os << mat.matrix[i * mat.cols + j] << "\t"; 
+            }
+            os << "\n"; 
+        }
+        return os;
     }
 
-    void inputMatrix()
+    friend std::istream& operator>>(std::istream& is, Matrix& mat)
     {
-        if (rows == 0 || cols == 0)
+        if (mat.rows == 0 || mat.cols == 0)
         {
-            std::cout << "матрица пустая" << std::endl;
-            return;
+            return is; 
         }
 
-        std::cout << "Введите элементы матрицы (" << rows << "x" << cols << "):" << std::endl;
-        for (size_t i = 0; i < rows; i++)
+        int size = mat.rows * mat.cols;
+        
+        for (int i = 0; i < size; ) 
         {
-            std::cout << "Строка " << i + 1 << ": ";
-            for (size_t j = 0; j < cols; j++)
+            if (is >> mat.matrix[i]) 
             {
-                std::cin >> matrix[i * cols + j];
+                i++; 
+            }
+            else 
+            {
+                std::cout << "Error. Enter a number ";
+                
+                is.clear(); 
+                
+                while (is.get() != '\n') {
+                    if (is.eof()) break; 
+                }
             }
         }
+        return is;
     }
 };

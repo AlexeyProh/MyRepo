@@ -1,95 +1,167 @@
 #pragma once
+#include <iostream>
 
 class MyString
 {
-    char* data{nullptr};
+    char *data{nullptr};
     size_t size{0};
 
-    public:
-    MyString() : data(nullptr), size(0) { }
-    MyString(size_t n) : size(n +1) {
-        if(!n) {
-            data = new char[size];
-            data[size] = '\0';
-        }
-        data = nullptr;
-    } 
+public:
+    MyString() : size(0)
+    {
+        data = new char[1];
+        data[size] = '\0';
+    }
+    MyString(size_t n) : size(n)
+    {
+        data = new char[size + 1];
+        data[0] = '\0';
+        data[size] = '\0';
+    }
 
-
-    MyString(MyString& other) : MyString(other.size - 1) {
+    MyString(const MyString &other) : MyString(other.size)
+    {
         for (size_t i = 0; i < size; i++)
         {
             data[i] = other.data[i];
         }
         data[size] = '\0';
-        
     }
 
-    MyString& operator=(const MyString& other){
-        if(this != &other){
-        size = other.size;
-        delete[] data;
-        data = new char[size];
+    MyString(const char *str) : size(0)
+    {
+        while (str[size] != '\0')
+        {
+            size++;
+        }
+
+        data = new char[size + 1];
         for (size_t i = 0; i < size; i++)
         {
-             data[i] = other.data[i];
+            data[i] = str[i];
         }
+        data[size] = '\0';
     }
+
+    ~MyString()
+    {
+        delete[] data;
+    }
+
+    MyString &operator=(const MyString &other)
+    {
+        if (this != &other)
+        {
+            size = other.size;
+            delete[] data;
+            data = new char[size + 1];
+            for (size_t i = 0; i < size; i++)
+            {
+                data[i] = other.data[i];
+            }
+            data[size] = '\0';
+        }
+
         return *this;
     }
 
-    bool operator>(const MyString& other){
-        
-        for (size_t i = 0; i < (size > other.size ? other.size : size) ; i++)
-        {
-            if (data[i] > other.data[i])
-                return true;    
-        }
+    bool operator<(const MyString &other) const
+    {
+        size_t min_size = (size < other.size) ? size : other.size;
 
-        return false;
-    }
-    
-    bool operator<(const MyString& other){
-        
-        for (size_t i = 0; i < (size > other.size ?  other.size : size) ; i++)
+        for (size_t i = 0; i < min_size; i++)
         {
             if (data[i] < other.data[i])
-                return true;    
+                return true;
+            if (data[i] > other.data[i])
+                return false;
+        }
+        return size < other.size;
+    }
+
+    bool operator>(const MyString &other) const
+    {
+        return other < *this;
+    }
+
+    bool operator<=(const MyString &other) const
+    {
+        return !(*this > other);
+    }
+
+    bool operator>=(const MyString &other) const
+    {
+        return !(*this < other);
+    }
+
+    bool operator!=(const MyString &other) const
+    {
+        if (size != other.size)
+            return true;
+
+        for (size_t i = 0; i < size; i++)
+        {
+            if (data[i] != other.data[i])
+                return true;
         }
 
         return false;
     }
 
-    bool operator>=(const MyString& other){
-        
-        for (size_t i = 0; i < (size > other.size ? other.size : size) ; i++)
+    friend std::ostream &operator<<(std::ostream &os, const MyString &str)
+    {
+        if (str.data != nullptr)
         {
-            if (data[i] >= other.data[i])
-                return true;    
+            os << str.data;
         }
-
-        return false;
+        return os;
     }
 
-    bool operator<=(const MyString& other){
-        
-        for (size_t i = 0; i < (size > other.size ? other.size : size) ; i++)
+    friend std::istream &operator>>(std::istream &is, MyString &str)
+    {
+        char c;
+
+        while (is.get(c) && (c == ' ' || c == '\n' || c == '\t' || c == '\r'))
+            ;
+
+        if (!is)
+            return is;
+
+        size_t capacity = 32;
+        size_t length = 0;
+        char *temp = new char[capacity];
+
+        do
         {
-            if (data[i] <= other.data[i])
-                return true;    
-        }
+            if (c == ' ' || c == '\n' || c == '\t' || c == '\r')
+            {
+                is.unget();
+                break;
+            }
 
-        return false;
-    }
+            if (length >= capacity - 1)
+            {
+                capacity *= 2;
+                char *new_temp = new char[capacity];
 
-    bool operator!=(const MyString& other){
-        
-        for (size_t i = 0; i < (size > other.size ? other.size : size) ; i++)
-        {
-            if (data[i] = other.data[i])
-                return false;    
-        }
+                for (size_t i = 0; i < length; i++)
+                {
+                    new_temp[i] = temp[i];
+                }
 
-        return true;
+                delete[] temp;
+                temp = new_temp;
+            }
+
+            temp[length++] = c;
+        } while (is.get(c));
+
+        temp[length] = '\0';
+
+        delete[] str.data;
+        str.size = length;
+        str.data = temp;
+
+        return is;
     }
 };
