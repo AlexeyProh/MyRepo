@@ -4,7 +4,7 @@ int main()
 {
 
     MyString s1;                 
-    MyString s2 = "Apple";     
+    MyString s2 = "Orange";     
     MyString s3 = s2;            
     MyString s4(10);             
     

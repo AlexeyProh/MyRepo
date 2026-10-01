@@ -7,10 +7,10 @@ class MyString
     size_t size{0};
 
 public:
-    MyString() : size(0)
+    MyString() : size(0), data(nullptr)
     {
         data = new char[1];
-        data[size] = '\0';
+        data[0] = '\0';
     }
     MyString(size_t n) : size(n)
     {
@@ -25,7 +25,7 @@ public:
         {
             data[i] = other.data[i];
         }
-        data[size] = '\0';
+        //data[size] = '\0';
     }
 
     MyString(const char *str) : size(0)
@@ -67,9 +67,9 @@ public:
 
     bool operator<(const MyString &other) const
     {
-        size_t min_size = (size < other.size) ? size : other.size;
+        size_t min = (size < other.size) ? size : other.size;
 
-        for (size_t i = 0; i < min_size; i++)
+        for (size_t i = 0; i < min; i++)
         {
             if (data[i] < other.data[i])
                 return true;
@@ -121,8 +121,7 @@ public:
     {
         char c;
 
-        while (is.get(c) && (c == ' ' || c == '\n' || c == '\t' || c == '\r'))
-            ;
+        while (is.get(c) && (c == ' ' || c == '\n' || c == '\t' || c == '\r'));
 
         if (!is)
             return is;
