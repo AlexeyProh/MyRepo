@@ -25,7 +25,7 @@ public:
         {
             data[i] = other.data[i];
         }
-        //data[size] = '\0';
+        data[size] = '\0';
     }
 
     MyString(const char *str) : size(0)
