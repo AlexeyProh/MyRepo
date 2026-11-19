@@ -2,273 +2,155 @@
 #include <string>
 #include <vector>
 
-class Article {
-private:
-    std::string title;
-    std::string author;
-
-public:
-    Article(std::string title = "", std::string author = "") 
-        : title(title), author(author) {}
-
-    std::string getTitle() const { return title; }
-    void setTitle(const std::string& t) { title = t; }
-
-    std::string getAuthor() const { return author; }
-    void setAuthor(const std::string& a) { author = a; }
-
-    void print() const {
-        std::cout << "Article: \"" << title << "\", Author: " << author << std::endl;
-    }
-};
-
-class LibraryCard {
+class TariffPlan {
 protected:
-    std::string author;
-    std::string title;
-    std::string authorMark;
-    int inventoryNumber;
-    std::string themeCode;
+    int id;
+    std::string name;
+    double baseFee;
 
 public:
-    LibraryCard(std::string author = "", std::string title = "", std::string authorMark = "", 
-                int invNum = 0, std::string themeCode = "")
-        : author(author), title(title), authorMark(authorMark), 
-          inventoryNumber(invNum), themeCode(themeCode) {}
+    TariffPlan(int id = 0, const std::string& name = "None", double baseFee = 0.0)
+        : id(id), name(name), baseFee(baseFee) {}
 
-    virtual ~LibraryCard() {}
+    virtual ~TariffPlan() = default;
 
-    std::string getAuthor() const { return author; }
-    void setAuthor(const std::string& a) { author = a; }
+    int getId() const { return id; }
+    void setId(int newId) { id = newId; }
 
-    std::string getTitle() const { return title; }
-    void setTitle(const std::string& t) { title = t; }
+    std::string getName() const { return name; }
+    void setName(const std::string& newName) { name = newName; }
 
-    std::string getAuthorMark() const { return authorMark; }
-    void setAuthorMark(const std::string& am) { authorMark = am; }
+    double getBaseFee() const { return baseFee; }
+    void setBaseFee(double newFee) { baseFee = (newFee >= 0) ? newFee : 0.0; }
 
-    int getInventoryNumber() const { return inventoryNumber; }
-    void setInventoryNumber(int num) { inventoryNumber = num; }
-
-    std::string getThemeCode() const { return themeCode; }
-    void setThemeCode(const std::string& code) { themeCode = code; }
-
-    std::string getAlphabeticalKey() const {
-        return author + " - " + title;
-    }
+    virtual double calculateMonthlyCost() const = 0;
 
     virtual void printInfo() const {
-        std::cout << "[" << inventoryNumber << "] " << author << " \"" << title 
-                  << "\" (Author mark: " << authorMark << ", Code: " << themeCode << ")" << std::endl;
+        std::cout << "ID: " << id << " | Name: " << name << " | Base fee: " << baseFee;
     }
 };
 
-class StandaloneEditionCard : public LibraryCard {
+class MobileTariff : virtual public TariffPlan {
 protected:
-    std::string publisher;
-    int year;
-    int circulation;
-    int pages;
+    int minutes;
+    int gigabytes;
+    int sms;
 
 public:
-    StandaloneEditionCard(std::string author = "", std::string title = "", std::string authorMark = "", 
-                          int invNum = 0, std::string themeCode = "",
-                          std::string publisher = "", int year = 0, int circulation = 0, int pages = 0)
-        : LibraryCard(author, title, authorMark, invNum, themeCode),
-          publisher(publisher), year(year), circulation(circulation), pages(pages) {}
+    MobileTariff(int id, const std::string& name, double baseFee, int minutes, int gigabytes, int sms)
+        : TariffPlan(id, name, baseFee), minutes(minutes), gigabytes(gigabytes), sms(sms) {}
 
-    std::string getPublisher() const { return publisher; }
-    void setPublisher(const std::string& p) { publisher = p; }
+    ~MobileTariff() override = default;
 
-    int getYear() const { return year; }
-    void setYear(int y) { year = y; }
+    int getMinutes() const { return minutes; }
+    void setMinutes(int newMinutes) { minutes = newMinutes; }
 
-    int getCirculation() const { return circulation; }
-    void setCirculation(int c) { circulation = c; }
+    int getGigabytes() const { return gigabytes; }
+    void setGigabytes(int newGb) { gigabytes = newGb; }
 
-    int getPages() const { return pages; }
-    void setPages(int p) { pages = p; }
+    int getSms() const { return sms; }
+    void setSms(int newSms) { sms = newSms; }
 
-    void printInfo() const override {
-        LibraryCard::printInfo();
-        std::cout << "   Publisher: " << publisher << ", Year: " << year 
-                  << ", Circulation: " << circulation << ", Pages: " << pages << std::endl;
-    }
-};
-
-class ArticleCard : public LibraryCard {
-private:
-    Article article;
-    StandaloneEditionCard* edition;
-
-public:
-    ArticleCard(Article art = Article(), std::string authorMark = "", int invNum = 0, 
-                std::string themeCode = "", StandaloneEditionCard* ed = nullptr)
-        : LibraryCard(art.getAuthor(), art.getTitle(), authorMark, invNum, themeCode),
-          article(art), edition(ed) {}
-
-    Article getArticle() const { return article; }
-    void setArticle(const Article& art) {
-        article = art;
-        author = art.getAuthor();
-        title = art.getTitle();
-    }
-
-    StandaloneEditionCard* getEdition() const { return edition; }
-    void setEdition(StandaloneEditionCard* ed) { edition = ed; }
-
-    void printInfo() const override {
-        std::cout << "Article Card -> ";
-        LibraryCard::printInfo();
-        if (edition != nullptr) {
-            std::cout << "   Published in: \"" << edition->getTitle() 
-                      << "\" (" << edition->getPublisher() << ", " << edition->getYear() << ")" << std::endl;
-        }
-    }
-};
-
-class ArticleCollectionCard : public StandaloneEditionCard {
-private:
-    std::vector<ArticleCard*> articleCards;
-
-public:
-    ArticleCollectionCard(std::string author = "", std::string title = "", std::string authorMark = "", 
-                          int invNum = 0, std::string themeCode = "",
-                          std::string publisher = "", int year = 0, int circulation = 0, int pages = 0)
-        : StandaloneEditionCard(author, title, authorMark, invNum, themeCode, publisher, year, circulation, pages) {}
-
-    std::vector<ArticleCard*> getArticleCards() const { return articleCards; }
-    void setArticleCards(const std::vector<ArticleCard*>& cards) { articleCards = cards; }
-
-    void addArticleCard(ArticleCard* card) {
-        articleCards.push_back(card);
+    double calculateMonthlyCost() const override {
+        return baseFee + (gigabytes * 0.25) + (minutes * 0.01);
     }
 
     void printInfo() const override {
-        std::cout << "Article Collection -> ";
-        StandaloneEditionCard::printInfo();
-        std::cout << "   Articles count: " << articleCards.size() << std::endl;
+        TariffPlan::printInfo();
+        std::cout << " | Total: " << calculateMonthlyCost()
+                  << " | Min: " << minutes << ", GB: " << gigabytes << ", SMS: " << sms << '\n';
     }
 };
 
-class BookCard : public StandaloneEditionCard {
-private:
-    Article bookArticle;
-
-public:
-    BookCard(Article art, std::string authorMark = "", int invNum = 0, std::string themeCode = "",
-             std::string publisher = "", int year = 0, int circulation = 0, int pages = 0)
-        : StandaloneEditionCard(art.getAuthor(), art.getTitle(), authorMark, invNum, themeCode, 
-                                publisher, year, circulation, pages),
-          bookArticle(art) {}
-
-    Article getArticle() const { return bookArticle; }
-    void setArticle(const Article& art) {
-        bookArticle = art;
-        author = art.getAuthor();
-        title = art.getTitle();
-    }
-
-    void printInfo() const override {
-        std::cout << "Book -> ";
-        StandaloneEditionCard::printInfo();
-    }
-};
-
-class Catalog {
+class InternetTariff : virtual public TariffPlan {
 protected:
-    std::vector<LibraryCard*> cards;
+    int speedMbps;
+    bool hasStaticIp;
 
 public:
-    Catalog() {}
-    virtual ~Catalog() {}
+    InternetTariff(int id, const std::string& name, double baseFee, int speedMbps, bool hasStaticIp)
+        : TariffPlan(id, name, baseFee), speedMbps(speedMbps), hasStaticIp(hasStaticIp) {}
 
-    void addCard(LibraryCard* card) {
-        cards.push_back(card);
+    ~InternetTariff() override = default;
+
+    int getSpeedMbps() const { return speedMbps; }
+    void setSpeedMbps(int newSpeed) { speedMbps = newSpeed; }
+
+    bool getHasStaticIp() const { return hasStaticIp; }
+    void setHasStaticIp(bool staticIp) { hasStaticIp = staticIp; }
+
+    double calculateMonthlyCost() const override {
+        double staticIpFee = hasStaticIp ? 5.0 : 0.0;
+        return baseFee + (speedMbps * 0.05) + staticIpFee;
     }
 
-    std::vector<LibraryCard*> getCards() const { return cards; }
-    void setCards(const std::vector<LibraryCard*>& c) { cards = c; }
-
-    void showAll() const {
-        for (size_t i = 0; i < cards.size(); i++) {
-            cards[i]->printInfo();
-        }
-    }
-};
-
-class ThematicCatalog : public Catalog {
-public:
-    std::vector<LibraryCard*> searchByCode(const std::string& code) const {
-        std::vector<LibraryCard*> result;
-        for (size_t i = 0; i < cards.size(); i++) {
-            if (cards[i]->getThemeCode() == code) {
-                result.push_back(cards[i]);
-            }
-        }
-        return result;
+    void printInfo() const override {
+        TariffPlan::printInfo();
+        std::cout << " | Total: " << calculateMonthlyCost()
+                  << " | Speed: " << speedMbps << " Mbps, Static IP: " << (hasStaticIp ? "Yes" : "No") << '\n';
     }
 };
 
-class AlphabeticalCatalog : public Catalog {
+class ComboTariff : public MobileTariff, public InternetTariff {
+private:
+    double discountPercent;
+
 public:
-    std::vector<LibraryCard*> search(const std::string& query) const {
-        std::vector<LibraryCard*> result;
-        for (size_t i = 0; i < cards.size(); i++) {
-            if (cards[i]->getAlphabeticalKey().find(query) != std::string::npos) {
-                result.push_back(cards[i]);
-            }
-        }
-        return result;
+    ComboTariff(int id, const std::string& name, double baseFee,
+                int minutes, int gigabytes, int sms,
+                int speedMbps, bool hasStaticIp, double discountPercent)
+        : TariffPlan(id, name, baseFee),
+          MobileTariff(id, name, baseFee, minutes, gigabytes, sms),
+          InternetTariff(id, name, baseFee, speedMbps, hasStaticIp),
+          discountPercent(discountPercent) {}
+
+    ~ComboTariff() override = default;
+
+    double getDiscountPercent() const { return discountPercent; }
+    void setDiscountPercent(double newDiscount) {
+        discountPercent = (newDiscount >= 0 && newDiscount <= 100) ? newDiscount : 0.0;
+    }
+
+    double calculateMonthlyCost() const override {
+        double mobilePart = (gigabytes * 0.25) + (minutes * 0.01);
+        double internetPart = (speedMbps * 0.05) + (hasStaticIp ? 5.0 : 0.0);
+        double total = baseFee + mobilePart + internetPart;
+        return total * (1.0 - discountPercent / 100.0);
+    }
+
+    void printInfo() const override {
+        TariffPlan::printInfo();
+        std::cout << " | Total: " << calculateMonthlyCost()
+                  << " | Min: " << minutes << ", GB: " << gigabytes << ", SMS: " << sms
+                  << ", Speed: " << speedMbps << " Mbps, Static IP: " << (hasStaticIp ? "Yes" : "No")
+                  << ", Discount: " << discountPercent << "%\n";
     }
 };
 
 int main() {
-    Article mainBookArt("The C++ Programming Language", "Stroustrup B.");
-    BookCard book1(mainBookArt, "S83", 1001, "004.43", "Addison-Wesley", 2013, 3000, 1368);
+    std::vector<TariffPlan*> tariffs;
 
-    ArticleCollectionCard collection("Various Authors", "Computer Science Journal #4", "C38", 
-                                     1002, "004.01", "Science Press", 2023, 500, 240);
+    tariffs.push_back(new MobileTariff(101, "Unlimited+", 25.0, 500, 30, 100));
+    tariffs.push_back(new InternetTariff(202, "Fiber 200", 30.0, 200, true));
+    tariffs.push_back(new ComboTariff(303, "All Inclusive MAX", 45.0, 1000, 50, 200, 300, true, 15.0));
 
-    Article art1("Graph Sorting Algorithms", "Smith J.");
-    Article art2("Database Optimization", "Doe A.");
-
-    ArticleCard artCard1(art1, "S20", 1003, "004.42", &collection);
-    ArticleCard artCard2(art2, "D30", 1004, "004.65", &collection);
-
-    collection.addArticleCard(&artCard1);
-    collection.addArticleCard(&artCard2);
-
-    ThematicCatalog themeCat;
-    AlphabeticalCatalog alphaCat;
-
-    LibraryCard* allCards[] = { &book1, &collection, &artCard1, &artCard2 };
-    for (int i = 0; i < 4; i++) {
-        themeCat.addCard(allCards[i]);
-        alphaCat.addCard(allCards[i]);
+    std::cout << "Tariff plans:\n";
+    for (size_t i = 0; i < tariffs.size(); ++i) {
+        tariffs[i]->printInfo();
     }
 
-    std::cout << "=== ALL CARDS IN CATALOG ===" << std::endl;
-    alphaCat.showAll();
-
-    std::cout << "\n=== ALPHABETICAL CATALOG SEARCH (query: 'Smith') ===" << std::endl;
-    std::vector<LibraryCard*> foundAlpha = alphaCat.search("Smith");
-    for (size_t i = 0; i < foundAlpha.size(); i++) {
-        foundAlpha[i]->printInfo();
-        std::cout << "   Alphabetical key: " << foundAlpha[i]->getAlphabeticalKey() << std::endl;
+    std::cout << "\nUpdating combo tariff:\n";
+    ComboTariff* combo = dynamic_cast<ComboTariff*>(tariffs[2]);
+    if (combo != nullptr) {
+        combo->setDiscountPercent(25.0);
+        combo->setSpeedMbps(500);
+        combo->printInfo();
     }
 
-    std::cout << "\n=== THEMATIC CATALOG SEARCH (code: '004.43') ===" << std::endl;
-    std::vector<LibraryCard*> foundTheme = themeCat.searchByCode("004.43");
-    for (size_t i = 0; i < foundTheme.size(); i++) {
-        foundTheme[i]->printInfo();
+    for (TariffPlan* ptr : tariffs) {
+        delete ptr;
     }
-
-    std::cout << "\n=== ARTICLES INSIDE COLLECTION ===" << std::endl;
-    std::vector<ArticleCard*> collArticles = collection.getArticleCards();
-    for (size_t i = 0; i < collArticles.size(); i++) {
-        collArticles[i]->getArticle().print();
-    }
+    tariffs.clear();
 
     return 0;
 }
